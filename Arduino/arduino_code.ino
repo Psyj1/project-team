@@ -6,10 +6,6 @@ int verdeB = 3;
 int amareloB = 5;
 int vermelhoB = 6;
 
-int botao = 12;
-
-bool semaforoALivre = true; 
-
 void setup() {
   Serial.begin(9600);
   
@@ -19,74 +15,76 @@ void setup() {
   pinMode(verdeB, OUTPUT);
   pinMode(amareloB, OUTPUT);
   pinMode(vermelhoB, OUTPUT);
-  pinMode(botao, INPUT_PULLUP);
   
-  limparTodosLeds();
   
-  digitalWrite(verdeA, LOW);
-  digitalWrite(vermelhoB, LOW);
+  setSemaforoA('V');
+  setSemaforoB('M');
+  
+  Serial.println("Sistema pronto. Comandos: A (libera A), B (libera B)");
 }
 
-void limparTodosLeds() {
-  digitalWrite(verdeA, HIGH);
-  digitalWrite(amareloA, HIGH);
-  digitalWrite(vermelhoA, HIGH);
-  digitalWrite(verdeB, HIGH);
-  digitalWrite(amareloB, HIGH);
-  digitalWrite(vermelhoB, HIGH);
+void setSemaforoA(char estado) {
+  digitalWrite(verdeA, LOW);
+  digitalWrite(amareloA, LOW);
+  digitalWrite(vermelhoA, LOW);
+  
+  switch(estado) {
+    case 'V': digitalWrite(verdeA, HIGH); break;
+    case 'A': digitalWrite(amareloA, HIGH); break;
+    case 'M': digitalWrite(vermelhoA, HIGH); break;
+  }
+}
+
+void setSemaforoB(char estado) {
+  digitalWrite(verdeB, LOW);
+  digitalWrite(amareloB, LOW);
+  digitalWrite(vermelhoB, LOW);
+  
+  switch(estado) {
+    case 'V': digitalWrite(verdeB, HIGH); break;
+    case 'A': digitalWrite(amareloB, HIGH); break;
+    case 'M': digitalWrite(vermelhoB, HIGH); break;
+  }
+}
+
+void piscaAmareloA(int vezes) {
+  for(int i = 0; i < vezes; i++) {
+    digitalWrite(amareloA, HIGH);
+    delay(500);
+    digitalWrite(amareloA, LOW);
+    delay(500);
+  }
+}
+
+void piscaAmareloB(int vezes) {
+  for(int i = 0; i < vezes; i++) {
+    digitalWrite(amareloB, HIGH);
+    delay(500);
+    digitalWrite(amareloB, LOW);
+    delay(500);
+  }
 }
 
 void loop() {
-  if (digitalRead(botao) == LOW) {
-    delay(50);
-    if (digitalRead(botao) == LOW) {
-      
-      Serial.println("Botão pressionado!");
-      
-      if (semaforoALivre) {
-        Serial.println("Fechando semáforo A...");
+  if (Serial.available() > 0) {
+    char comando = Serial.read();
+    
+    switch(comando) {
+      case 'A':  
+        Serial.println("Comando: Liberar A");
+        piscaAmareloB(3);       
+        setSemaforoB('M');    
+        setSemaforoA('V');       
+        Serial.println("A VERDE | B VERMELHO");
+        break;
         
-       
-        digitalWrite(verdeA, HIGH); 
-        digitalWrite(amareloA, LOW);  
-        delay(2000);
-        
-        digitalWrite(amareloA, HIGH); 
-        digitalWrite(vermelhoA, LOW); 
-        
-        
-        digitalWrite(vermelhoB, HIGH); 
-        digitalWrite(verdeB, LOW);
-        
-        semaforoALivre = false;
-        Serial.println("Semáforo B liberado!");
-      }
-      else {
-        Serial.println("Fechando semáforo B...");
-        
-        
-        digitalWrite(verdeB, HIGH);
-        digitalWrite(amareloB, LOW);
-        delay(2000);
-        
-        
-        digitalWrite(amareloB, HIGH); 
-        digitalWrite(vermelhoB, LOW); 
-        
-      
-        digitalWrite(vermelhoA, HIGH); 
-        digitalWrite(verdeA, LOW); 
-        
-        semaforoALivre = true;
-        Serial.println("Semáforo A liberado!");
-      }
-      
-      
-      digitalWrite(amareloA, HIGH);
-      digitalWrite(amareloB, HIGH);
-      
-      while(digitalRead(botao) == LOW);
-      delay(50);
+      case 'B':
+        Serial.println("Comando: Liberar B");
+        piscaAmareloA(3);        
+        setSemaforoA('M');       
+        setSemaforoB('V');      
+        Serial.println("A VERMELHO | B VERDE");
+        break;
     }
   }
 }
