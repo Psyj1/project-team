@@ -46,7 +46,7 @@ while True:
         if semaforo_atual != ultimo_comando_enviado:
             arduino.write(semaforo_atual.encode())
             ultimo_comando_enviado = semaforo_atual
-            print(f"📨 Comando enviado: {semaforo_atual}")
+            print(f"Comando enviado: {semaforo_atual}")
         
         cv2.putText(frame, f"Carros: {carros}", (20, 50),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
